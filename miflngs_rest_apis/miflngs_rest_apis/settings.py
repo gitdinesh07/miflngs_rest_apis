@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CSRF_COOKIE_SECURE = False
 
 CORS_ALLOW_HEADERS = (
     'accept',
@@ -96,8 +97,8 @@ WSGI_APPLICATION = 'miflngs_rest_apis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': '',
+        'NAME': 'mif_user_reg'
     }
 }
 
