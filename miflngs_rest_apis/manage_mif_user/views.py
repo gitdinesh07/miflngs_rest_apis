@@ -49,7 +49,7 @@ class MiUserList(APIView):
                 elif user_id != None or user_pswrd != '':
 
                     collection =db_con()["mif_user_reg"]
-                    data = collection.find({"_id":str(user_id), "u_pswrd" :str(user_pswrd)})
+                    data = collection.find({"_id":str(user_id), "password" :str(user_pswrd)})
                     dic = {"user_dt": json.loads(dumps(data))}
                     return JsonResponse(dic)
                     #return Response(dic)
