@@ -19,9 +19,6 @@ def default_page(request):
     return  HttpResponse("<h1>hello welcome </h1>");
     # return render(request, "welcome.html", {"Welcome": str(u_name)})
 
-def if_error(err_msg,err_code):
-    return  JsonResponse({"msg": str(err_msg), "msgcode": int(err_code)})
-
 client = object
 def db_con():
     try:
