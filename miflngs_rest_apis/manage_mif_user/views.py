@@ -72,6 +72,7 @@ class MiUserList(APIView):
         if request.method == 'POST':
             try:
                 data = request.body.decode('utf-8')
+                print("Data =", data)
                 collection = db_con()["mif_user_reg"]
                 ins_msg=collection.insert_one(json.loads(data)).acknowledged
                 global client
@@ -81,7 +82,7 @@ class MiUserList(APIView):
 
             except ValueError as e:
                 print("error --",e)
-                return JsonResponse({"msg":"Value Error","msgcode":86})
+                return JsonResponse({"msg":"Value Error","msgcode":86,"data -":str(data)})
             except DuplicateKeyError as e:
                 return JsonResponse({"msg":"User Name Exist","msgcode":83})
             except InvalidId as e:
