@@ -11,7 +11,7 @@ urlpatterns = [
     #url(r'^user/(?P<user_id>(.*)+)/(?P<user_pswrd>[a-z0-9]+)$',views.MiUserList.as_view()),
     url(r'^users/create$',views.MiUserList().post,name='post'),
     url(r'^users/psw-reset$',views.MiUserList().put,name='PUT')
-    #now check again
+    #now check again check check
 
 ]
 
