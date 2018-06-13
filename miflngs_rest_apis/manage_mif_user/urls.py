@@ -5,13 +5,15 @@ from django.http import JsonResponse
 
 urlpatterns = [
 
-    url(r'^$',views.default_page),
     # GET- for user login
-    url(r'^users/(?P<user_id>[a-z0-9]+)/(?P<user_pswrd>[a-z0-9]+)$',views.MiUserList.as_view()),
-    #url(r'^user/(?P<user_id>(.*)+)/(?P<user_pswrd>[a-z0-9]+)$',views.MiUserList.as_view()),
-    url(r'^users/create$',views.MiUserList().post,name='post'),
-    url(r'^users/psw-reset$',views.MiUserList().put,name='PUT')
-    #tested 1234141414141141342
+    url(r'^users/(?P<user_id>[a-z0-9]+)/(?P<user_pswrd>[a-z0-9]+)$', views.MiUserList.as_view()),
+    # url(r'^user/(?P<user_id>(.*)+)/(?P<user_pswrd>[a-z0-9]+)$',views.MiUserList.as_view()),
+    url(r'^users/create$', views.MiUserList().post, name='post'),
+    url(r'^users/psw-rst$', views.MiUserList().put, name='PUT'),
+    url(r'^users/psw-frgt$', views.MiUserList().put_forget, name='PUT'),
+    url(r'^users/psw-frgt-user_chk/(?P<get_id>[a-z0-9@.]+)$', views.MiUserList().put_chk_usr, name='GET'),
+
+
 
 ]
 
