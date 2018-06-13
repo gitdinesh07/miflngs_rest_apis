@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from bson.json_util import dumps
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from miflngs_rest_apis import model as db_connection
+from miflngs_rest_apis import models as db_connection
 
 
 client = object
