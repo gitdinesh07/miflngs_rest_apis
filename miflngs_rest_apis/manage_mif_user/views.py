@@ -20,30 +20,38 @@ class MiUserList(APIView):
     # for user login get method
     def get(self, request, user_id, user_pswrd):
         try:
-            if request.method == 'GET' and user_id != '' or user_pswrd != '':
+            if request.method == 'GET' and user_id != '' and user_pswrd != '':
                 try:
-                        collection = db_connection.db_con()["mif_user_reg"]
-                        data = collection.find({"$and": [{"_id": str(user_id)}, {"password": str(user_pswrd)}]})
-                        dic = {'user_dt': json.loads(dumps(data))}
-                        if dic.get('user_dt'):
-                            return JsonResponse(dic)
-                        elif bool(dic.get('user_dt')) is False :
-                            return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11})
+                    data = {}
+                    collection = db_connection.db_con()["mif_user_reg"]
+                    if collection.find({"$and": [{"_id": str(user_id)}, {"password": str(user_pswrd)}]}).count() > 0:
+                        data = {"msg": "Success", "msg_code": 1}
+                        #data = collection.find({"$and": [{"_id": str(user_id)}, {"password": str(user_pswrd)}]},{'_id': 1, 'username': 1})
+                        #data = json.loads(dumps(data[0]))
+                    else:
+                        data = {"msg": "User & Password Not Exist", "msg_code": 11}
+                    return JsonResponse(data)
                 except ValueError as e:
                     print("error --", e)
                     return JsonResponse({"msg": "Value Error", "msg_code": 86})
-                except InvalidId as e:
-                    return JsonResponse({"msg": "Invalid ID", "msg_code": 88, "msg_dec": str(e)})
-                except InvalidStringData:
-                    return JsonResponse({"msg": "Invalid Data", "msg_code": 91})
-                except Exception as e:
-                    return JsonResponse({"msg": "Parent Exception at GET", "msg_code": 0, 'msg_dec': str(e)})
                 finally:
                     global client
                     client = None
+        except Exception as e:
+                return JsonResponse({"msg": "Parent Exception", "msg_code": 0, "msg_dec": str(e)})
 
-            elif user_id is None or user_pswrd == "":
-                return JsonResponse({"msg": "User Name or Password can't be Null", "msg_code": 7})
+    def get_user_dt(self, request, get_id):
+        try:
+            if request.method == 'GET' and get_id != '':
+                data = {}
+                collection = db_connection.db_con()["mif_user_reg"]
+                if collection.find({"_id": str(get_id)}).count() > 0:
+                    data = collection.find({"_id": str(get_id)})
+                    data = json.loads(dumps(data[0]))
+                    print("type of data - ", type(data))
+                else:
+                    data = {"msg": "User & Password Not Exist", "msg_code": 11}
+                return JsonResponse(data)
         except Exception as e:
             return JsonResponse({"msg": "Parent Exception", "msg_code": 0, "msg_dec": str(e)})
 
@@ -63,8 +71,6 @@ class MiUserList(APIView):
                     return JsonResponse({"msg": "Value Error", "msg_code": 86})
                 except DuplicateKeyError:
                     return JsonResponse({"msg": "User Name Already Exist", "msg_code": 83})
-                except InvalidId as e:
-                    return JsonResponse({"msg": "Invalid ID", "msg_code": 88, "msg_dec": str(e)})
                 except InvalidStringData:
                     return JsonResponse({"msg": "Invalid Data", "msg_code": 91})
                 except Exception as e:
@@ -80,7 +86,6 @@ class MiUserList(APIView):
         try:
             if request.method == 'PUT':
                 try:
-
                     data = request.body.decode('utf-8')
                     data = json.loads(data)
                     ins_msg = 0
@@ -88,26 +93,16 @@ class MiUserList(APIView):
                         return JsonResponse({"msg": "Fail Password Reset - Fields Can not be Empty", "msg_code": 13})
                     elif data['_id'] != '' and str(data['password']) != "" and str(data['new_password']) != "":
                         collection = db_connection.db_con()["mif_user_reg"]
-                        user_id = {}
-                        try:
-                            user_id = collection.find({"_id": str(data["_id"]), "password": str(data['password'])}, {'_id': 1}).__getitem__(0)
-                            # check user exist or not user_id == False if it empty.
-                            if bool(user_id) is False:
-                                return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11})
-                            elif user_id['_id'] != '' or user_id['_id'] is not None:
-                                ins_msg = collection.update_one({'_id': data['_id']}, {'$set': {'password': data['new_password']},"$currentDate":{"lastModified":True}}).modified_count
-                        except Exception as e:
-                            print("Exception - ", e)
-                            if bool(user_id) is False :
-                                return JsonResponse({"msg": "Incorrect User ID & Password ", "msg_code": 11, "msg_dec": str(e)})
+                        if collection.find({"_id": str(data["_id"]), "password": str(data['password'])}, {'_id': 1}).count() > 0:
+                            ins_msg = collection.update_one({'_id': data['_id']},{'$set': {'password': data['new_password']},"$currentDate": {"lastModified": True}}).modified_count
+                        else:
+                            return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11})
                     global client
                     client = None
-
                     if ins_msg == 1:
                         return JsonResponse({"msg": "Success", "msg_code": 1})
                     elif ins_msg == 0:
                         return JsonResponse({"msg": "Fail", "msg_code": 0})
-
                 except ValueError as e:
                     print("error --", e)
                     return JsonResponse({"msg": "Value Error", "msg_code": 86})
@@ -133,22 +128,17 @@ class MiUserList(APIView):
                     collection = db_connection.db_con()["mif_user_reg"]
                     user_id = {}
                     ins_msg = 0
-                    try:
-                        # Get _id from database
-                        user_id = json.loads(MiUserList().put_chk_usr(request,str(data['verify_id'])).getvalue())
-                        # check user exist in DB or not user_id == False if it empty.
-                        print("user id ",(user_id))
-                        if '_id' in user_id  :
-                            ins_msg = collection.update_one(user_id, {'$set': {'password': data['password']},
-                                                                      "$currentDate": {
-                                                                          "lastModified": True}}).modified_count
+                    # Get _id from database
+                    user_id = json.loads(MiUserList().put_chk_usr(request,str(data['verify_id'])).getvalue())
+                    print("user_id ", user_id)
+                    # check user exist in DB or not user_id == False if it empty.
+                    if '_id' in user_id:
+                        ins_msg = collection.update_one(user_id, {'$set': {'password': data['password']},
+                                                                  "$currentDate": {
+                                                                      "lastModified": True}}).modified_count
 
-                        elif '_id' not in user_id  and 'msg_code' in user_id :
-                            return JsonResponse(user_id)
-                    except Exception as e:
-                        print("Exception - ", e)
-                        if bool(user_id) is False:
-                            return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11, "msg_dec": str(e)})
+                    elif '_id' not in user_id  and 'msg_code' in user_id :
+                        return JsonResponse(user_id)
                     global client
                     client = None
                     if ins_msg == 1:
@@ -160,8 +150,6 @@ class MiUserList(APIView):
                     return JsonResponse({"msg": "Value Error", "msg_code": 86})
                 except DuplicateKeyError as e:
                     return JsonResponse({"msg": "User Name Exist", "msg_code": 83})
-                except InvalidId as e:
-                    return JsonResponse({"msg": "Invalid ID", "msg_code": 88})
                 except InvalidStringData:
                     return JsonResponse({"msg": "Invalid Data", "msg_code": 91})
                 except Exception as e:
@@ -178,28 +166,20 @@ class MiUserList(APIView):
             #if request.method == 'GET':
                 print("Get_data -",get_id)
                 collection = db_connection.db_con()["mif_user_reg"]
-                user_id = {}
                 if get_id == "":
-                    return JsonResponse(
-                        {"msg": "Fail Password Forget - Fields Can not be Empty", "msg_code": 13})
+                    return JsonResponse({"msg": "Fail Password Forget - Fields Can not be Empty", "msg_code": 13})
                 elif get_id != '':
-                    try:
-                        # Get _id from database
-                        user_id = collection.find(
-                            {'$or': [{"_id": str(get_id)}, {"email": str(get_id)}]},
-                            {'mob_ivr': 1}).__getitem__(0)
-                        # check user exist in DB or not user_id == False if it empty.
-                        if bool(user_id) is False:
-                            return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11})
-                        elif user_id['mob_ivr'] != '' or user_id['mob_ivr'] is None:
-                            return JsonResponse(user_id)
-                    except Exception as e:
-                        print("Exception - ", e)
-                        if bool(user_id) is False:
-                            return JsonResponse(
-                                {"msg": "User Does Not Exist", "msg_code": 11, "msg_dec": str(e)})
-        except AssertionError as e:
-            print(e)
+                    # check user exist in DB or not user_id == False if it empty.
+                    if  collection.find({'$or': [{"_id": str(get_id)}, {"email": str(get_id)}]}).count() > 0:
+                        user_id = collection.find({'$or': [{"_id": str(get_id)}, {"email": str(get_id)}]},{'mob_ivr': 1}).__getitem__(0)
+                        return JsonResponse(user_id)
+                    else:
+                        return JsonResponse({"msg": "User Does Not Exist", "msg_code": 11})
+        except Exception as e:
+            return JsonResponse({"msg": "Parent Exception", "msg_code": 0, "msg_dec": str(e)})
+        finally:
+            global client
+            client = None
 
 def handler404(request):
     return JsonResponse({"msg": "Not Found", "msg_code": 404})
