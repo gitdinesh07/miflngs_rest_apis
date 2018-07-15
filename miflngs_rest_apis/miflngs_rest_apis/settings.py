@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'qjb%q$6#q_g7cbttxo3%x5ib9oi8*3p29rj&0-bavdrle3$3f6'
+SECRET_KEY = '*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'manage_mif_user'
+    'manage_mif_user',
+    'mif_categories',
+    'mif_feeds'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -70,7 +72,6 @@ MIDDLEWARE = [
 ]
 
 
-
 ROOT_URLCONF = 'miflngs_rest_apis.urls'
 
 TEMPLATES = [
@@ -98,7 +99,7 @@ WSGI_APPLICATION = 'miflngs_rest_apis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': '',
-        'NAME': 'mif_user_reg'
+        'NAME': 'mif_user_dt'
     }
 }
 
@@ -122,6 +123,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 

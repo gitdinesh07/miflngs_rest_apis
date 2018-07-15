@@ -16,9 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from  manage_mif_user import urls as manage_user_urls
-from django.urls import path,include
+from django.urls import path, include
+from . import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('apis/manage-user/', include('manage_mif_user.urls')),
-]
+    path('apis/manage-categories/', include('mif_categories.urls')),
+    path('apis/manage-advisor/', include('mif_advisor.urls')),
+    path('apis/manage-feeds/', include('mif_feeds.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
