@@ -258,7 +258,7 @@ class user_service():
         try:
             otp = str((randint(100000, 999999)))
             otp_msg = "Your OTP is " + str(otp) + " for reset mifeelings password\n\nmifeelings"
-            get_res = requests.get("http://103.37.80.115:8080/TataApi/SMS.jsp?ani=" + str(get_mob) + "&message=" + otp_msg + "&cli=65656")
+            get_res = requests.get("http://{your-sms-provider-ip}/TataApi/SMS.jsp?ani=" + str(get_mob) + "&message=" + otp_msg + "&cli=65656")
             if get_res.status_code == 200:
                 print({"mob_no": str(get_mob), "otp": otp, "msg_code": 1})
                 return {"mob_no": str(get_mob), "otp": otp, "msg_code": 1}
